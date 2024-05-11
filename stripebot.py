@@ -80,6 +80,8 @@ async def link(message: types.Message):
 You can use a fake credit card number 4242 4242 4242 4242 to test the payment.
 
 Data of expiration date and CVC can be any future date and any 3 digits respectively.
+
+Email can be any email address. You can use a fake email address to test the payment.
         
         """
     )
