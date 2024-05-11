@@ -1,0 +1,13 @@
+[Unit]
+Description = This is service to run antivirus bot
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+
+WorkingDirectory=/home/ubuntu/stripebot
+ExecStart=/home/ubuntu/stripebot/venv/bin/python3 /home/ubuntu/stripebot/stripebot.py
+Restart=on-failure
+RestartSec=1s
