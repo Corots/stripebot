@@ -82,7 +82,7 @@ server {
 https://dashboard.stripe.com/webhooks
 ```
 
-Navigate to [Stripe Dashboard](https://www.youtube.com/watch?v=UKP0AkAoJiE) and add a webhook.
+Navigate to [Stripe Dashboard](https://dashboard.stripe.com/webhooks) and add a webhook.
 
 Add the webhook secret to the STRIPE_WEBHOOK_SECRET variable in the .env file.
 
