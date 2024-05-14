@@ -2,6 +2,11 @@
 
 Welcome to the source code repository of the [Shoe shop :)](https://t.me/example_mert_1_bot). This bot is designed to be an example of telegram/stripe integration.
 
+Why do you use a custome code for stripe integration, if you can use build in Stripe payment processor in telegram?
+Answer : You can do what. But only for one-time purchase products, not for subscriptions. So this bot is actually intended to work with subscriptions after  being connected to a database. Purchase of a single product this way - is overkill, and this code just serve as an example of webhook integration.
+
+If you sell one-time purchase products, use implemented telegram payment system, its much better.
+
 # How to Start a Bot
 
 ## 1. Download the Repository
@@ -82,7 +87,7 @@ server {
 https://dashboard.stripe.com/webhooks
 ```
 
-Navigate to [Stripe Dashboard](https://www.youtube.com/watch?v=UKP0AkAoJiE) and add a webhook.
+Navigate to [Stripe Dashboard](https://dashboard.stripe.com/webhooks) and add a webhook.
 
 Add the webhook secret to the STRIPE_WEBHOOK_SECRET variable in the .env file.
 
