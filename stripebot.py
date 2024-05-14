@@ -17,11 +17,23 @@ from load_dotenv import load_dotenv
 
 load_dotenv()
 
+from aiogram.types import PreCheckoutQuery, ShippingQuery, SuccessfulPayment
+from aiogram.methods.answer_pre_checkout_query import AnswerPreCheckoutQuery
+from aiogram.methods.answer_shipping_query import AnswerShippingQuery
+from aiogram.enums.content_type import ContentType
+from aiogram import F
+
+
 # those two is important for a webhook
 stripe.api_key = os.getenv("STRIPE_API_KEY")
 stripe_webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 STRIPE_LINK = os.getenv("STRIPE_LINK")
+PAYMENTS_PROVIDER_TOKEN = os.getenv("PAYMENTS_PROVIDER_TOKEN")
+photo_url = (
+    """https://stripe-camo.global.ssl.fastly.net/49f5fa9057b6e8cbd766bb826b196557402870b98afc364636679d13453bc56b/68747470733a2f2f66696c65732e7374726970652e636f6d2f6c696e6b732f4d44423859574e6a64463878544664714d6d78445a4670614e46525363304e7066475a735833526c633352666231644e637a56544e6b747263316f335255786f4e46686a566d4a53593056743030426c493253306266""",
+)
+
 
 # Initialize Bot instance with default bot properties which will be passed to all API calls
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
@@ -48,7 +60,9 @@ async def start(message: types.Message):
     await message.answer(
         """Hello! I am a bot that can generate a payment link for you. And you can buy shoes from me. Isn't it awesome? 
         
-Use the command /get_link to get the paymet link.
+Use the command /get_link to get the paymet link outside of the telegram.
+
+Use the command /pay_by_telegram to pay directly from the telegram.
 """
     )
 
@@ -58,7 +72,9 @@ async def about(message: types.Message):
     await message.answer(
         """Hello! I am a bot that can generate a payment link for you. And you can buy shoes from me. Isn't it awesome? 
         
-Use the command /get_link to get the paymet link.
+Use the command /get_link to get the paymet link outside of the telegram.
+
+Use the command /pay_by_telegram to pay directly from the telegram.
 """
     )
 
@@ -84,6 +100,98 @@ Data of expiration date and CVC can be any future date and any 3 digits respecti
 Email can be any email address. You can use a fake email address to test the payment.
         
         """
+    )
+
+
+# Setup prices
+prices = [
+    types.LabeledPrice(label="Working Time Machine", amount=200),
+    types.LabeledPrice(label="Gift wrapping", amount=100),
+]
+
+# Setup shipping options
+shipping_options = [
+    types.ShippingOption(
+        id="instant",
+        title="WorldWide Teleporter",
+        prices=[types.LabeledPrice(label="Teleporter", amount=1000)],
+    ),
+    types.ShippingOption(
+        id="pickup",
+        title="Local pickup",
+        prices=[types.LabeledPrice(label="Pickup", amount=300)],
+    ),
+]
+
+
+@dp.message(Command("pay_by_telegram"))
+async def pay(message: types.Message, bot: Bot):
+    """
+    Start payment process
+    """
+
+    await bot.send_invoice(
+        message.chat.id,
+        title="Awesome Shoes",
+        description="""Want to buy a pair of shoes?
+        We have the best shoes in the world!""",
+        provider_token=PAYMENTS_PROVIDER_TOKEN,
+        currency="usd",
+        photo_url=photo_url[0],
+        photo_height=512,  # !=0/None or picture won't be shown
+        photo_width=512,
+        photo_size=512,
+        is_flexible=True,  # True If you need to set up Shipping Fee
+        prices=prices,
+        start_parameter="shoes-example",
+        payload="HAPPY FRIDAYS COUPON",
+    )
+
+
+# * Send payment cofirmation
+@dp.pre_checkout_query()
+async def confirm_pay(query: types.PreCheckoutQuery, bot: Bot):
+    """
+    Confirmed payment method
+    """
+
+    await bot(
+        AnswerPreCheckoutQuery(
+            pre_checkout_query_id=query.id,
+            ok=True,
+            error_message="Aliens tried to steal your card's CVV,"
+            " but we successfully protected your credentials,"
+            " try to pay again in a few minutes, we need a small rest.",
+        )
+    )
+
+
+# * Send shipping confirmation
+@dp.shipping_query()
+async def shipping(shipping_query: types.ShippingQuery):
+
+    await bot(
+        AnswerShippingQuery(
+            shipping_query_id=shipping_query.id,
+            shipping_options=shipping_options,
+            ok=True,
+            error_message="Oh, seems like our Dog couriers are having a lunch right now."
+            " Try again later!",
+        )
+    )
+
+
+@dp.message(F.successful_payment)
+async def got_payment(message: types.Message):
+    await message.answer_photo(
+        photo=photo_url[0],
+        caption="Hoooooray! Thanks for payment! We will proceed your order for `{} {}`"
+        " as fast as possible! Stay in touch."
+        "\n\nUse /start again to get a pair of shoes for your friend!".format(
+            message.successful_payment.total_amount / 100,
+            message.successful_payment.currency,
+        ),
+        parse_mode="Markdown",
     )
 
 
@@ -162,7 +270,8 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None))
         await bot.send_photo(
             chat_id=result["client_id"],
             caption=f"Enjoy your shoes!",
-            photo=types.FSInputFile("shoes.png"),
+            # photo=types.FSInputFile("shoes.png"),
+            photo=photo_url[0],
         )
     logging.info(f"Stripe event is sent to the bot.")
     return result
