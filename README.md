@@ -7,6 +7,11 @@ Answer : You can do what. But only for one-time purchase products, not for subsc
 
 If you sell one-time purchase products, use implemented telegram payment system, its much better.
 
+UPDATED:
+Added PAYMENTS_PROVIDER_TOKEN varible to the .env file. You can get it in BotFather [BotFather](https://t.me/botfather) - Your Bot - Payment - Stripe - Connect Test Mode.
+
+It will enable inner telegram payment integration (Works only for one-time purchase type of goods, not for subscription)
+
 # How to Start a Bot
 
 ## 1. Download the Repository
@@ -42,6 +47,7 @@ BOT_TOKEN = "515234234234:AAHnsdfsdgfsdfgdfgdfgdfg"
 STRIPE_WEBHOOK_SECRET = "whsec_Psdffgbfghfhfhthgrthfghfgh"
 STRIPE_API_KEY = "sk_test_51LWj2lCdZZ4TRsCin0sdfscdfsefscfsfgscfsdcfsdfcsdfcsdcf"
 STRIPE_LINK = "https://buy.stripe.com/test_bxgrdgergergergerg"
+PAYMENTS_PROVIDER_TOKEN = "332523123:TEST:fsdfsfsdf""
 ```
 
 Replace placeholders with your actual bot data.
